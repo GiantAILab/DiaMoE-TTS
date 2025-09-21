@@ -1,0 +1,8 @@
+model = "F5TTS_Base"
+ref_audio = ""
+ref_text = ""
+gen_text = ""
+# File with text to generate. Ignores the text above.
+gen_file = ""
+output_dir = ""
+output_file = ""

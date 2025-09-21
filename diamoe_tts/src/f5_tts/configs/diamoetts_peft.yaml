@@ -1,0 +1,64 @@
+hydra:
+  run:
+    dir: ckpts/base_${model.name}_${model.mel_spec.mel_spec_type}_${model.tokenizer}_${datasets.name}_${datasets.arrow_name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+datasets:
+  name: train1  # dataset name
+  vocab: path/to/vocab.txt
+  arrow_name: raw
+  batch_size_per_gpu: 2000  # 8 GPUs, 8 * 38400 = 307200    default=28800,a30=8192
+  batch_size_type: frame  # frame | sample | dialectaware
+  max_samples: 32  # max sequences per batch if use frame-wise batch_size. we set 32 for small models, 64 for base models
+  num_workers: 8
+
+optim:
+  use_old_scheduler: False
+  epochs: 10
+  learning_rate: 1.0e-5
+  num_warmup_updates: 500  # warmup updates
+  grad_accumulation_steps: 1  # note: updates = steps / grad_accumulation_steps
+  max_grad_norm: 1.0  # gradient clipping
+  bnb_optimizer: False  # use bnb 8bit AdamW optimizer or not
+
+model:
+  name: F5TTS_Base  # model name
+  tokenizer: char  # tokenizer type
+  tokenizer_path: null  # if 'custom' tokenizer, define the path want to use (should be vocab.txt)
+  backbone: DiT_peft
+  arch:
+    dim: 1024
+    depth: 22
+    heads: 16
+    ff_mult: 2
+    text_dim: 512
+    text_mask_padding: False
+    conv_layers: 4
+    pe_attn_head: 1
+    checkpoint_activations: False  # recompute activations and save memory for extra compute
+  mel_spec:
+    target_sample_rate: 24000
+    n_mel_channels: 100
+    hop_length: 256
+    win_length: 1024
+    n_fft: 1024
+    mel_spec_type: vocos  # vocos | bigvgan
+  vocoder:
+    is_local: False  # use local offline ckpt or not
+    local_path: null  # local vocoder path
+
+ckpts:
+  logger: tensorboard  # wandb | tensorboard | null
+  log_samples: True  # infer random sample per save checkpoint. wip, normal to fail with extra long samples
+  save_per_updates: 5000  # save checkpoint per updates
+  keep_last_n_checkpoints: 200  # -1 to keep all, 0 to not save intermediate, > 0 to keep last N checkpoints
+  last_per_updates: 2000  # save last checkpoint per updates
+  save_dir: ckpts/base_${model.name}_${model.mel_spec.mel_spec_type}_${model.tokenizer}_${datasets.name}_${datasets.arrow_name}
+  basic_ckpt_path:  path/to/basic/ckpt
+MoE:
+  use_moe: True
+  num_exps: 9
+  moe_topK: 1
+  use_dialect_clf: False
+  dialect_clf_lambda: 0.1
+  dialect_kinds: 9
+  expert_type: MLP
