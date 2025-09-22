@@ -14,7 +14,7 @@
 ```bash
 # clone code
 git clone https://github.com/GiantAILab/DiaMoE-TTS.git
-cd <repo-folder>
+cd DiaMoE-TTS
 
 # conda environment
 conda create -n diamoetts python=3.10
