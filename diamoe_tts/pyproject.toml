@@ -43,6 +43,14 @@ dependencies = [
     "tensorboard",
     "python-Levenshtein",
     "openpyxl",
+    "g2pM",
+    "inflect",
+    "loguru",
+    "pypinyin_dict",
+    "PyYAML",
+    "onnxruntime",
+    "nltk",
+    "pandas",
 ]
 
 [project.urls]

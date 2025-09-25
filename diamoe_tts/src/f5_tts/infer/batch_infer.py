@@ -195,6 +195,12 @@ parser.add_argument(
     help=f"using expert type of MoE",
 )
 
+parser.add_argument(
+    "--lora-path",
+    type=str,
+    default=None,
+    help=f"using expert type of MoE",
+)
 
 args = parser.parse_args()
 
@@ -311,7 +317,7 @@ print(f"Using model loaded from {ckpt_file}...")
 print(model_cls, model_arc, ckpt_file)
 ema_model = load_model(
     model_cls, model_arc, ckpt_file, mel_spec_type=vocoder_name, vocab_file=vocab_file, device=device,
-    use_moe=use_moe, num_exps = num_exps, moe_topK = moe_topK, expert_type=expert_type
+    use_moe=use_moe, num_exps = num_exps, moe_topK = moe_topK, expert_type=expert_type, lora=args.lora_path
 )
 
 

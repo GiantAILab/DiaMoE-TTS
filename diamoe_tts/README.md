@@ -1,6 +1,8 @@
-# DIAMOE-TTS
+# DiaMoE-TTS
 
-
+<p align="center">
+  <img src="../pics/diamoe_tts.PNG" width="720" alt="backbone">
+</p>
 
 ## Configs
 ### `src/f5_tts/configs/diamoetts.yaml`

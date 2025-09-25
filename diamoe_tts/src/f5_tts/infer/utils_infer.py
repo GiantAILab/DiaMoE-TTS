@@ -187,7 +187,7 @@ def transcribe(ref_audio, language=None):
 # load model checkpoint for inference
 
 
-def load_checkpoint(model, ckpt_path, device: str, dtype=None, use_ema=True):
+def load_checkpoint(model, ckpt_path, device: str, dtype=None, use_ema=True, lora=None):
     if dtype is None:
         dtype = (
             torch.float16
@@ -228,6 +228,10 @@ def load_checkpoint(model, ckpt_path, device: str, dtype=None, use_ema=True):
             if key in checkpoint["model_state_dict"]:
                 del checkpoint["model_state_dict"][key]
         model.load_state_dict(checkpoint["model_state_dict"])
+    if lora is not None:
+        print(f'loading peft checkpoint from {lora}')
+        lora_ckpt = torch.load(lora, map_location=device, weights_only=True)
+        model.load_state_dict(lora_ckpt["model_state_dict"], strict=False)
 
     del checkpoint
     torch.cuda.empty_cache()
@@ -250,7 +254,8 @@ def load_model(
     use_moe=False,
     num_exps = None,
     moe_topK = None,
-    expert_type = None
+    expert_type = None,
+    lora = None
 ):
     if vocab_file == "":
         vocab_file = str(files("f5_tts").joinpath("infer/examples/vocab.txt"))
@@ -296,7 +301,7 @@ def load_model(
     ).to(device)
 
     dtype = torch.float32 if mel_spec_type == "bigvgan" else None
-    model = load_checkpoint(model, ckpt_path, device, dtype=dtype, use_ema=use_ema)
+    model = load_checkpoint(model, ckpt_path, device, dtype=dtype, use_ema=use_ema, lora=lora)
 
     return model
 

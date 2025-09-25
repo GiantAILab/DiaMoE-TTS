@@ -6,16 +6,24 @@ A comprehensive frontend processing system for Chinese dialects, supporting phon
 
 This system processes Chinese text through a multi-step pipeline to generate accurate phonological representations for various Chinese dialects. It handles everything from character-to-pinyin mapping to complex tone sandhi rules and IPA transcription.
 
+<p align="center">
+  <img src="../pics/ipa_example.PNG" width="720" alt="ipa_eq">
+</p>
+
 ## Supported Dialects
 
-- **Mandarin varieties**: `putonghua`, `shijiazhuang`, `zhengzhou`
+- **Mandarin varieties**: `putonghua`, `shijiazhuang`, `zhengzhou`, `nanjing`, `wuhan`, `xian`, `chengdu`, `qingdao`
 - **Wu dialects**: `shanghai`
 - **Min dialects**: `gaoxiong` 
-- **Other varieties**: `xian`, `chengdu`, `qingdao`, `jingjujingbai`, `jingjuyunbai`, `nanjing`, `wuhan`
+- **Peking Opera Pronunciations**: `jingjujingbai`, `jingjuyunbai`
 
 ## Processing Pipeline
 
 The system processes input text through 6 sequential steps:
+
+### Step 0: Get Frontend in Mandarin Pinyin
+- Obtain the corresponding Mandarin pinyin of the text frontend
+- **Script**: `gen_ppinyin_oop.py`
 
 ### Step 1: Fix Erhua in Mandarin Frontend
 - Handles retroflex suffix (儿化音) correction in Mandarin pinyin

@@ -12,7 +12,7 @@ CUDA_VISIBLE_DEVICES=0 python ./batch_infer.py \
 --ref_text path/to/reference.txt \
 --output_dir path/to/output_dir
 
-
+# if use peft model, add --lora-path path/to/lora.pt
 
 
 

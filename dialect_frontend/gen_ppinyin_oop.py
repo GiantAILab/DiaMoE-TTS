@@ -1,5 +1,3 @@
-import pdb
-
 from tools.mix_wrapper import Preprocessor
 from tqdm import tqdm
 import argparse
@@ -55,7 +53,6 @@ def get_ppinyin(infile, outfile=None, lang: str='ZH'):
                 continue
             idx = line_list[0]
             text = line_list[1]
-            # phones_list, word2ph, tones_list, ppinyins, _ = frontend.get_splited_phonemes_tones([text], return_other=True)
             phones_list, word2ph, tones_list, ppinyins, oop, zhongwens = frontend.get_splited_phonemes_tones([text])
             zhongwens = replace_english_punctuation_with_chinese(zhongwens)
             ppinyins = replace_english_punctuation_with_chinese(ppinyins)

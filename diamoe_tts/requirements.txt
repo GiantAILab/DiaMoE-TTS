@@ -27,3 +27,11 @@ x_transformers>=1.31.14
 tensorboard
 python-Levenshtein
 openpyxl
+g2pM
+inflect
+loguru
+pypinyin_dict
+PyYAML
+onnxruntime
+nltk
+pandas
