@@ -1,7 +1,7 @@
 # DiaMoE-TTS
 
 <p align="center">
-  <img src="../pics/diamoe_tts.PNG" width="720" alt="backbone">
+  <img src="../pics/diamoe_tts.png" width="720" alt="backbone">
 </p>
 
 ## Configs
