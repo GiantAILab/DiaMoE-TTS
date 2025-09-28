@@ -93,7 +93,7 @@ See [ipa_frontend](./dialect_frontend/README.md) for more details.
 ## Datasets 📚
 > We utilize the [Common Voice Cantonese dataset](https://arxiv.org/abs/1912.06670), the [Emilia Mandarin dataset](https://arxiv.org/abs/2407.05361) and dialectal data     
 > from the [KeSpeech corpus](https://openreview.net/forum?id=b3Zoeq2sCLq) and a open-source [Sourthern Min dataset](https://sutian.moe.edu.tw/zh-hant/siongkuantsuguan/) for training.  
-> TODO: We will release the frontend of the open-source dataset IPA.
+> We release the frontend of the [🤗open-source dataset IPA](https://huggingface.co/datasets/RICHARD12369/DiaMoE-TTS_IPA_Trainingset)
 ---
 
 ## Pretrained Models 🧪
@@ -109,7 +109,7 @@ See [ipa_frontend](./dialect_frontend/README.md) for more details.
 - [x] release code for train/infer
 - [x] release code for IPA frontend
 - [x] release our checkpoints
-- [ ] release open-source training dataset IPA frontend
+- [x] release open-source training dataset IPA frontend
 - [ ] develop gradio app for DiaMoE-TTS
 
 
