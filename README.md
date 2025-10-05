@@ -3,8 +3,7 @@
 ---
 <div align="center">
 
-([![arXiv]&#40;https://img.shields.io/badge/arXiv-2509.22727-b31b1b.svg&#41;]&#40;https://arxiv.org/abs/2509.22727;)
-[//]: # ([![hfspace]&#40;https://img.shields.io/badge/🤗-HF%20Space-yellow&#41;]&#40;https://huggingface.co/&#41;)
+[![arXiv](https://img.shields.io/badge/arXiv-2509.22727-b31b1b.svg)](https://arxiv.org/abs/2509.22727)
 [![Hugging Face](https://img.shields.io/badge/🤗%20HuggingFace-DiaMoETTS-yellow)](https://huggingface.co/RICHARD12369/DiaMoE_TTS)
 [![ModelScope](https://img.shields.io/badge/🔮%20ModelScope-DiaMoETTS-blue)](https://modelscope.cn/models/)
 
