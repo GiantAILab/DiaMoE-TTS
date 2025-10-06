@@ -23,7 +23,7 @@ This repository is designed to provide a comprehensive implementation for the se
 - 🏋️ **Training & inference scripts** (CLI + config examples) for end-to-end reproduction.
 - 🤗 **Hugging Face** and 🔮 **ModelScope** checkpoints *(to be updated)* for easy access to pre-trained models.
 
-Short Intro on [**DiaMoE-TTS**](https://arxiv.org/abs/):
+Short Intro on [**DiaMoE-TTS**](https://arxiv.org/abs/2509.22727):
 
 Dialect speech embodies rich cultural and linguistic diversity, yet building text-to-speech (TTS) systems for dialects remains challenging due to scarce data, inconsistent orthographies, and complex phonetic variation. To address these issues, we present DiaMoE-TTS, a unified IPA-based framework that standardizes phonetic representations and resolves grapheme-to-phoneme ambiguities. Built upon the F5-TTS architecture, the system introduces a dialect-aware Mixture-of-Experts (MoE) to model phonological differences and employs parameter-efficient adaptation with Low-Rank Adaptors (LoRA) and Conditioning Adapters for rapid transfer to new dialects. Unlike approaches dependent on large-scale or proprietary resources, DiaMoE-TTS enables scalable, open-data-driven synthesis. Experiments demonstrate natural and expressive speech generation, achieving zero-shot performance on unseen dialects and specialized domains such as Peking Opera with only a few hours of data.
 
@@ -47,6 +47,7 @@ Regarding the construction details of the IPA dialect frontend system, please re
 - **🚀[2025-09-21]** Initial public release of codebase.
 - **🔥[2025-09-25]** Release checkpoints on 🤗 **Hugging Face** and 🔮 **ModelScope**
 - **📦[2025-09-25]** Release training datasets
+- **📄[2025-10-05]** Update our paper on arXiv
 
 ---
 
