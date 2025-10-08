@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-方言TTS Zero Shot推理的Gradio界面
-整合文本前端处理和TTS模型推理
+Dialect TTS Zero Shot Inference Gradio Interface
+Integrating text frontend processing and TTS model inference
 """
 
 import os
@@ -50,28 +50,26 @@ from f5_tts.infer.utils_infer import (
 # 模型配置参数 - 在这里直接指定
 MODEL_CONFIG = {
     "model_name": "gradio",
-    "ckpt_file": "/user-fs/chenzihao/wangzixin/f5_dialect/ckpts/loras/10ep_mlpEXP_model_state_dict.pt",  # 请修改为你的模型路径
+    "ckpt_file": "/path/to/your/model.pt",  # 请修改为你的模型路径
     "vocab_file": "./diamoe_tts/data/vocab.txt",
     "use_moe": True,
     "num_exps": 9,
     "moe_topK": 1,
     "expert_type": "mlp"
 }
-
+ 
 class DialectTTSPipeline:
     """方言TTS处理管道"""
     
     def __init__(self, auto_load_model=True):
         self.dialect_list = [
-            "putonghua", "chengdu", "gaoxiong", "jingjujingbai", 
-            "jingjuyunbai", "nanjing", "qingdao", "shanghai", 
+            "putonghua", "chengdu", "gaoxiong", "shanghai",
             "shijiazhuang", "wuhan", "xian", "zhengzhou"
         ]
-        
         # 初始化前端处理器
         self.preprocessor = Preprocessor()
         self.frontend = self.preprocessor.frontend['ZH']
-        print("前端处理器初始化完成!")
+        print("Frontend processor initialized!")
         
         # 加载IPA音素列表和标点符号
         self.load_vocab_and_punctuation()
@@ -92,7 +90,7 @@ class DialectTTSPipeline:
                 moe_topK=MODEL_CONFIG["moe_topK"],
                 expert_type=MODEL_CONFIG["expert_type"]
             )
-        
+          
     def load_vocab_and_punctuation(self):
         """加载IPA音素列表和标点符号"""
         try:
@@ -114,10 +112,10 @@ class DialectTTSPipeline:
             else:
                 self.punctuation_list = []
             
-            print(f"加载了{len(self.ipa_list)}个IPA音素和{len(self.punctuation_list)}个标点符号")
+            print(f"Loaded {len(self.ipa_list)} IPA phonemes and {len(self.punctuation_list)} punctuation marks")
             
         except Exception as e:
-            print(f"加载词汇表失败: {e}")
+            print(f"Failed to load vocabulary: {e}")
             self.ipa_list = []
             self.punctuation_list = []
     
@@ -148,12 +146,12 @@ class DialectTTSPipeline:
             else:
                 # 跳过空符号和|符号
                 if symbol != '[]' and symbol != '[|]':
-                    print(f'警告: 未知符号 {symbol}')
+                    print(f'Warning: Unknown symbol {symbol}')
                 # 跳过未知符号
                 continue
         
         result = ' '.join(ipa_text)
-        print(f"IPA格式转换: {text[:50]}... -> {result[:50]}...")
+        print(f"IPA format conversion: {text[:50]}... -> {result[:50]}...")
         return result
     
     def replace_english_punctuation_with_chinese(self, text: str) -> str:
@@ -179,10 +177,10 @@ class DialectTTSPipeline:
             zhongwens = self.replace_english_punctuation_with_chinese(zhongwens)
             ppinyins = self.replace_english_punctuation_with_chinese(ppinyins)
             
-            print(f"文本转拼音: {text} -> {ppinyins}")
+            print(f"Text to pinyin: {text} -> {ppinyins}")
             return zhongwens, ppinyins, oop
         except Exception as e:
-            print(f"拼音转换错误: {e}")
+            print(f"Pinyin conversion error: {e}")
             return text, text, []
     
     def run_shell_command(self, command: str, cwd: str = None) -> tuple:
@@ -209,45 +207,95 @@ class DialectTTSPipeline:
     
     def process_frontend_pipeline(self, text: str, dialect: str) -> str:
         """完整的前端处理管道"""
-        print(f"开始处理方言前端: {dialect}")
+        print(f"Starting dialect frontend processing: {dialect}")
         
         # 创建临时目录
         temp_dir = tempfile.mkdtemp()
         try:
             # 步骤1: 直接使用已加载的前端处理器生成拼音
-            print("执行拼音转换...")
+            print("Executing pinyin conversion...")
             zhongwens, ppinyins, oop = self.process_text_to_pinyin(text)
             
             # 步骤2: 创建拼音文件供后续处理
             pinyin_file = os.path.join(temp_dir, "pinyin_output.txt")
             with open(pinyin_file, 'w', encoding='utf-8') as f:
                 f.write(f"temp_id\t{zhongwens}\t{ppinyins}\n")
-
+             
             # 步骤3: 运行方言前端处理脚本
             if dialect == "putonghua":
                 # 普通话直接使用拼音结果
                 final_output = pinyin_file
             else:
-                # 运行single_frontend.sh脚本
-                frontend_command = f"bash single_frontend.sh all {dialect} {pinyin_file}"
-                print(f"执行前端处理: {frontend_command}")
+                # 运行single_frontend.sh脚本，使用绝对路径
+                current_dir = os.getcwd()
+                dialect_dir = os.path.join(current_dir, "dialect_frontend")
+                script_path = os.path.join(dialect_dir, "single_frontend.sh")
                 
-                ret_code, stdout, stderr = self.run_shell_command(frontend_command, cwd="./dialect_frontend")
-                
-                if ret_code != 0:
-                    print(f"前端处理失败: {stderr}")
-                    print(f"标准输出: {stdout}")
-                    # 使用原始拼音文件作为回退
+                # 检查脚本文件是否存在
+                if not os.path.exists(script_path):
+                    print(f"Script file does not exist: {script_path}")
+                    print(f"Current working directory: {current_dir}")
+                    print(f"Trying to list dialect_frontend directory contents:")
+                    try:
+                        files = os.listdir(dialect_dir) if os.path.exists(dialect_dir) else ["Directory does not exist"]
+                        print(files)
+                    except:
+                        print("Cannot list directory contents")
                     final_output = pinyin_file
                 else:
-                    # 查找最终的IPA格式文件
-                    base_name = os.path.splitext(pinyin_file)[0]
-                    ipa_file = base_name + "_ipa_format.txt"
-                    if os.path.exists(ipa_file):
-                        final_output = ipa_file
-                    else:
-                        print("未找到IPA格式文件，使用拼音文件")
+                    # 使用相对路径在dialect_frontend目录下执行
+                    frontend_command = f'bash single_frontend.sh all {dialect} "{os.path.basename(pinyin_file)}"'
+                    print(f"Executing frontend processing: {frontend_command}")
+                    print(f"Working directory: {dialect_dir}")
+                    
+                    # 复制文件到dialect_frontend目录以便脚本处理
+                    temp_pinyin_file = os.path.join(dialect_dir, os.path.basename(pinyin_file))
+                    try:
+                        shutil.copy2(pinyin_file, temp_pinyin_file)
+                        print(f"File copied to: {temp_pinyin_file}")
+                    except Exception as e:
+                        print(f"File copy failed: {e}")
+                    
+                    # 设置环境变量
+                    env = os.environ.copy()
+                    env['LANG'] = 'C.UTF-8'
+                    env['LC_ALL'] = 'C.UTF-8'
+                    
+                    try:
+                        result = subprocess.run(
+                            frontend_command,
+                            shell=True,
+                            capture_output=True,
+                            text=True,
+                            cwd=dialect_dir,  # 在dialect_frontend目录下执行
+                            env=env,
+                            encoding='utf-8'
+                        )
+                        ret_code, stdout, stderr = result.returncode, result.stdout, result.stderr
+                    except Exception as e:
+                        ret_code, stdout, stderr = 1, "", str(e)
+                
+                    if ret_code != 0:
+                        print(f"Frontend processing failed: {stderr}")
+                        print(f"Standard output: {stdout}")
+                        # 使用原始拼音文件作为回退
                         final_output = pinyin_file
+                    else:
+                        # 查找最终的IPA格式文件（在dialect_frontend目录下）
+                        base_name = os.path.splitext(temp_pinyin_file)[0]
+                        ipa_file = base_name + "_ipa_format.txt"
+                        if os.path.exists(ipa_file):
+                            # 将结果文件复制回临时目录
+                            final_output = os.path.join(temp_dir, "final_ipa_format.txt")
+                            try:
+                                shutil.copy2(ipa_file, final_output)
+                                print(f"Result file copied to: {final_output}")
+                            except Exception as e:
+                                print(f"Result file copy failed: {e}")
+                                final_output = pinyin_file
+                        else:
+                            print("IPA format file not found, using pinyin file")
+                            final_output = pinyin_file
             
             # 读取最终结果
             if os.path.exists(final_output):
@@ -263,11 +311,11 @@ class DialectTTSPipeline:
                     else:
                         return text
             else:
-                print(f"输出文件不存在: {final_output}")
+                print(f"Output file does not exist: {final_output}")
                 return text
                 
         except Exception as e:
-            print(f"前端处理出错: {e}")
+            print(f"Frontend processing error: {e}")
             return text
         finally:
             # 清理临时文件
@@ -285,7 +333,7 @@ class DialectTTSPipeline:
                       expert_type: str = "mlp"):
         """加载TTS模型"""
         try:
-            print("开始加载TTS模型...")
+            print("Starting to load TTS model...")
             
             # 加载vocoder
             vocoder_name = mel_spec_type
@@ -302,7 +350,7 @@ class DialectTTSPipeline:
                 local_path=vocoder_local_path, 
                 device=device
             )
-            print("Vocoder加载成功!")
+            print("Vocoder loaded successfully!")
             
             # 加载TTS模型
             model_cfg_path = f"./diamoe_tts/src/f5_tts/configs/{model_name}.yaml"
@@ -313,11 +361,11 @@ class DialectTTSPipeline:
             model_cls = get_class(f"f5_tts.model.{model_cfg.model.backbone}")
             model_arc = model_cfg.model.arch
             
-            print(f"使用模型配置: {model_cfg_path}")
-            print(f"模型类: {model_cls}, 架构: {model_arc}")
+            print(f"Using model config: {model_cfg_path}")
+            print(f"Model class: {model_cls}, architecture: {model_arc}")
             
             if ckpt_file and os.path.exists(ckpt_file):
-                print(f"从检查点加载模型: {ckpt_file}")
+                print(f"Loading model from checkpoint: {ckpt_file}")
                 self.model = load_model(
                     model_cls, model_arc, ckpt_file, 
                     mel_spec_type=vocoder_name, 
@@ -329,13 +377,13 @@ class DialectTTSPipeline:
                     expert_type=expert_type.lower()
                 )
                 self.model_loaded = True
-                print("TTS模型加载成功!")
+                print("TTS model loaded successfully!")
             else:
-                print("未提供有效的模型检查点文件")
+                print("No valid model checkpoint file provided")
                 self.model_loaded = False
                 
         except Exception as e:
-            print(f"模型加载失败: {e}")
+            print(f"Model loading failed: {e}")
             self.model_loaded = False
     
     def synthesize_speech(self, text: str, dialect: str, 
@@ -348,19 +396,19 @@ class DialectTTSPipeline:
                          speed: float = 1.0) -> tuple:
         """合成语音"""
         if not self.model_loaded:
-            return None, "模型未加载，请先加载模型"
+            return None, "Model not loaded, please load model first"
         
         try:
-            print(f"开始合成语音: {dialect}")
-            print(f"输入文本: {text}")
+            print(f"Starting speech synthesis: {dialect}")
+            print(f"Input text: {text}")
             
             # 步骤1: 前端处理
             processed_text = self.process_frontend_pipeline(text, dialect)
-            print(f"前端处理结果: {processed_text}")
+            print(f"Frontend processing result: {processed_text}")
             
             # 步骤2: 预处理参考音频和文本
             ref_audio, ref_text_processed = preprocess_ref_audio_text(ref_audio_path, ref_text)
-            print(f"参考音频处理完成")
+            print(f"Reference audio processing completed")
             
             # 步骤3: IPA格式转换
             # 对生成文本进行格式转换
@@ -375,8 +423,8 @@ class DialectTTSPipeline:
             else:
                 ref_text_processed_ipa = ref_text_processed
             
-            print(f"IPA格式转换 - 生成文本: {processed_text_ipa}")
-            print(f"IPA格式转换 - 参考文本: {ref_text_processed_ipa}")
+            print(f"IPA format conversion - Generated text: {processed_text_ipa}")
+            print(f"IPA format conversion - Reference text: {ref_text_processed_ipa}")
             
             # 步骤4: 进行TTS推理
             audio_segment, final_sample_rate, spectrogram = infer_process(
@@ -400,86 +448,101 @@ class DialectTTSPipeline:
             output_file = tempfile.NamedTemporaryFile(suffix='.wav', delete=False)
             sf.write(output_file.name, audio_segment, final_sample_rate)
             
-            return output_file.name, "合成成功!"
+            return output_file.name, "Synthesis successful!"
             
         except Exception as e:
-            print(f"语音合成失败: {e}")
-            return None, f"合成失败: {str(e)}"
+            print(f"Speech synthesis failed: {e}")
+            return None, f"Synthesis failed: {str(e)}"
+    
+    def generate_frontend_only(self, text: str, dialect: str) -> tuple:
+        """Generate frontend processing only without TTS"""
+        try:
+            print(f"Starting frontend-only processing: {dialect}")
+            print(f"Input text: {text}")
+            
+            # 直接调用完整的前端处理管道，传入纯净的用户文本
+            processed_text = self.process_frontend_pipeline(text, dialect)
+            print(f"Frontend processing result: {processed_text}")
+            
+            # IPA格式转换
+            processed_text_ipa = self.convert_to_ipa_format(processed_text)
+            print(f"IPA format result: {processed_text_ipa}")
+            
+            return processed_text, processed_text_ipa, "Frontend processing successful!"
+            
+        except Exception as e:
+            print(f"Frontend processing failed: {e}")
+            return text, text, f"Frontend processing failed: {str(e)}"
 
-# 全局管道实例 - 预加载模型
-print("正在初始化方言TTS管道并预加载模型...")
+# Global pipeline instance - preload model
+print("Initializing Dialect TTS pipeline and preloading model...")
 pipeline = DialectTTSPipeline(auto_load_model=True)
 
-# Sample texts for quick input
-SAMPLE_TEXTS = [
-    ["Hello, this is a test.", "Hello, this is a test."],
-    ["How are you today?", "How are you today?"],
-    ["Welcome to DiaMoE-TTS!", "Welcome to DiaMoE-TTS!"],
-    ["The weather is nice today.", "The weather is nice today."],
-    ["Thank you for using our system.", "Thank you for using our system."]
-]
+# Sample texts for different languages
+SAMPLE_TEXTS = {
+    "Chinese": [
+        "你好，欢迎使用方言语音合成系统。",
+        "今天天气真不错，阳光明媚。",
+        "春眠不觉晓，处处闻啼鸟。",
+        "山重水复疑无路，柳暗花明又一村。",
+        "海内存知己，天涯若比邻。"
+    ]
+}
 
-# Default reference audio and text for each dialect
-DEFAULT_REFS = {
+# Sample reference audios for each dialect (male and female versions)
+SAMPLE_REFERENCE_AUDIOS = {
     "putonghua": {
-        "audio_path": "/path/to/putonghua_ref.wav",
-        "text": "This is a Putonghua reference."
+        "male": "prompts/putonghua_male_prompt.wav",
+        "female": "prompts/putonghua_female_prompt.wav"
     },
     "chengdu": {
-        "audio_path": "/path/to/chengdu_ref.wav", 
-        "text": "This is a Chengdu dialect reference."
+        "male": "prompts/chengdu_male_prompt.wav",
+        "female": "prompts/chengdu_female_prompt.wav"
+    },
+    "gaoxiong": {
+        "male": "prompts/hokkien_male_prompt.wav",
+        "female": "prompts/hokkien_female_prompt.wav"
+    },
+    "nanjing": {
+        "male": "prompts/nanjing_male_prompt.wav",
+        "female": "prompts/nanjing_female_prompt.wav"
     },
     "shanghai": {
-        "audio_path": "/path/to/shanghai_ref.wav",
-        "text": "This is a Shanghai dialect reference."
+        "male": "prompts/shanghai_male_prompt.wav",
+        "female": "prompts/shanghai_female_prompt.wav"
     },
-    "jingjuyunbai": {
-        "audio_path": "/path/to/jingjuyunbai_ref.wav",
-        "text": "This is a Jingju Yunbai reference."
+    "shijiazhuang": {
+        "male": "prompts/shijiazhuang_male_prompt.wav",
+        "female": "prompts/shijiazhuang_female_prompt.wav"
     },
-    # Add more dialects as needed
+    "tianjin": {
+        "male": "prompts/tianjin_male_prompt.wav",
+        "female": "prompts/tianjin_female_prompt.wav"
+    },
+    "xian": {
+        "male": "prompts/xian_male_prompt.wav",
+        "female": "prompts/xian_female_prompt.wav"
+    },
+    "zhengzhou": {
+        "male": "prompts/zhengzhou_male_prompt.wav",
+        "female": "prompts/zhengzhou_female_prompt.wav"
+    }
 }
 
 def create_gradio_interface():
-    """Create Gradio Interface"""
-    
-    def convert_text_to_ipa_interface(text, dialect):
-        """Convert text to IPA format interface function"""
-        if not text.strip():
-            return "Please input text to convert", ""
-        
-        try:
-            # Process frontend pipeline
-            processed_text = pipeline.process_frontend_pipeline(text, dialect)
-            # Convert to IPA format
-            ipa_result = pipeline.convert_to_ipa_format(processed_text)
-            return processed_text, ipa_result
-        except Exception as e:
-            return f"Error: {str(e)}", ""
-    
-    def fill_sample_text(evt: gr.SelectData):
-        """Fill sample text when clicked"""
-        return SAMPLE_TEXTS[evt.index][1]
-    
-    def fill_default_ref(dialect):
-        """Fill default reference audio and text for selected dialect"""
-        if dialect in DEFAULT_REFS:
-            ref_info = DEFAULT_REFS[dialect]
-            return ref_info["audio_path"], ref_info["text"]
-        return None, ""
+    """Create Gradio interface"""
     
     def synthesize_interface(text, dialect, ref_audio, ref_text, 
-                           target_rms, cross_fade_duration, nfe_step, 
-                           cfg_strength, sway_sampling_coef, speed):
-        """Speech synthesis interface function"""
+                           target_rms, nfe_step, speed):
+        """Interface function for speech synthesis"""
         if not text.strip():
-            return None, "Please input text to synthesize"
+            return None, "Please enter text to synthesize"
         
         if not ref_audio:
             return None, "Please upload reference audio"
         
         if not ref_text.strip():
-            return None, "Please input reference text"
+            return None, "Please enter reference text"
         
         audio_file, message = pipeline.synthesize_speech(
             text=text,
@@ -487,37 +550,83 @@ def create_gradio_interface():
             ref_audio_path=ref_audio,
             ref_text=ref_text,
             target_rms=target_rms,
-            cross_fade_duration=cross_fade_duration,
+            cross_fade_duration=0.15,  # Fixed value
             nfe_step=nfe_step,
-            cfg_strength=cfg_strength,
-            sway_sampling_coef=sway_sampling_coef,
+            cfg_strength=2.0,  # Fixed value
+            sway_sampling_coef=-1.0,  # Fixed value
             speed=speed
         )
         
         return audio_file, message
     
-    # Create interface with blue-purple theme
-    with gr.Blocks(
-        title="DiaMoE-TTS: Dialectal Mixture of Experts Text-to-Speech",
-        theme=gr.themes.Soft(
-            primary_hue=gr.themes.colors.purple,
-            secondary_hue=gr.themes.colors.blue,
-            neutral_hue=gr.themes.colors.slate
-        ).set(
-            body_background_fill_dark="*neutral_950",
-            block_background_fill="*neutral_50",
-            block_border_width="1px",
-            block_title_text_weight="600"
-        )
-    ) as demo:
-        gr.Markdown(
-            "# 🎙️ DiaMoE-TTS: Dialectal Mixture of Experts Text-to-Speech",
-            elem_classes="center-text"
-        )
-        gr.Markdown(
-            "A zero-shot dialectal speech synthesis system supporting multiple Chinese dialects with MoE architecture.",
-            elem_classes="center-text"
-        )
+    def frontend_only_interface(text, dialect):
+        """Interface function for frontend processing only"""
+        if not text.strip():
+            return "", "", "Please enter text to process"
+        
+        processed_text, ipa_text, message = pipeline.generate_frontend_only(text, dialect)
+        return processed_text, ipa_text, message
+    
+    def update_sample_text(sample_text):
+        """Update text input with selected sample"""
+        return sample_text
+    
+    def update_sample_audio_male(dialect):
+        """Update reference audio and text with male sample for selected dialect"""
+        dialect_samples = SAMPLE_REFERENCE_AUDIOS.get(dialect, {})
+        audio_path = dialect_samples.get("male", "")
+        
+        ref_text = ""
+        if audio_path and os.path.exists(audio_path):
+            # 读取对应的txt文件
+            txt_path = audio_path.replace('.wav', '.txt')
+            if os.path.exists(txt_path):
+                try:
+                    with open(txt_path, 'r', encoding='utf-8') as f:
+                        line = f.readline().strip()
+                        # 解析格式: TEXT\t文本内容\tIPA内容
+                        parts = line.split('\t')
+                        if len(parts) >= 3:
+                            ref_text = parts[1]  # 提取中间的文本部分
+                        elif len(parts) == 2:
+                            ref_text = parts[1]  # 兼容只有两列的情况
+                except Exception as e:
+                    print(f"Error reading reference text from {txt_path}: {e}")
+            
+            return audio_path, ref_text
+        else:
+            return None, ""
+    
+    def update_sample_audio_female(dialect):
+        """Update reference audio and text with female sample for selected dialect"""
+        dialect_samples = SAMPLE_REFERENCE_AUDIOS.get(dialect, {})
+        audio_path = dialect_samples.get("female", "")
+        
+        ref_text = ""
+        if audio_path and os.path.exists(audio_path):
+            # 读取对应的txt文件
+            txt_path = audio_path.replace('.wav', '.txt')
+            if os.path.exists(txt_path):
+                try:
+                    with open(txt_path, 'r', encoding='utf-8') as f:
+                        line = f.readline().strip()
+                        # 解析格式: TEXT\t文本内容\tIPA内容
+                        parts = line.split('\t')
+                        if len(parts) >= 3:
+                            ref_text = parts[1]  # 提取中间的文本部分
+                        elif len(parts) == 2:
+                            ref_text = parts[1]  # 兼容只有两列的情况
+                except Exception as e:
+                    print(f"Error reading reference text from {txt_path}: {e}")
+            
+            return audio_path, ref_text
+        else:
+            return None, ""
+    
+    # Create interface
+    with gr.Blocks(title="DiaMoE-TTS") as demo:
+        gr.Markdown("# 🎙️ DiaMoE-TTS")
+        gr.Markdown("This is a zero-shot dialect speech synthesis system supporting multiple Chinese dialects")
         
         # Display model status
         with gr.Row():
@@ -528,162 +637,142 @@ def create_gradio_interface():
                 f"({MODEL_CONFIG['num_exps']} experts, Top{MODEL_CONFIG['moe_topK']})"
             )
         
-        # Text to IPA Conversion Module
-        with gr.Tab("📝 Text to IPA Conversion"):
-            gr.Markdown("## Convert Text to IPA Phonemes")
+        with gr.Tab("Frontend Processing"):
+            gr.Markdown("## Text Frontend Processing Only")
+            gr.Markdown("Generate phonetic representation without TTS synthesis")
             
             with gr.Row():
                 with gr.Column():
-                    ipa_input_text = gr.Textbox(
-                        label="Input Text",
-                        placeholder="Enter text to convert to IPA...",
+                    frontend_text_input = gr.Textbox(
+                        label="Input Text (Chinese text input supported)", 
+                        placeholder="Please enter Chinese text to process...",
                         lines=3
                     )
                     
-                    ipa_dialect_choice = gr.Dropdown(
-                        label="Select Dialect",
+                    frontend_dialect_choice = gr.Dropdown(
+                        label="Select Dialect (Choose dialect type for processing)", 
                         choices=pipeline.dialect_list,
                         value="putonghua"
                     )
                     
-                    convert_btn = gr.Button("🔄 Convert to IPA", variant="primary")
+                    frontend_process_btn = gr.Button("🔤 Process Frontend", variant="primary")
                 
                 with gr.Column():
-                    ipa_frontend_output = gr.Textbox(
-                        label="Frontend Processing Result",
-                        lines=3,
-                        interactive=False
+                    processed_output = gr.Textbox(
+                        label="Processed Text", 
+                        interactive=False,
+                        lines=3
                     )
                     
-                    ipa_final_output = gr.Textbox(
-                        label="Final IPA Format", 
-                        lines=3,
+                    ipa_output = gr.Textbox(
+                        label="IPA Format", 
+                        interactive=False,
+                        lines=3
+                    )
+                    
+                    frontend_status = gr.Textbox(
+                        label="Processing Status", 
                         interactive=False
                     )
             
-            convert_btn.click(
-                fn=convert_text_to_ipa_interface,
-                inputs=[ipa_input_text, ipa_dialect_choice],
-                outputs=[ipa_frontend_output, ipa_final_output]
+            frontend_process_btn.click(
+                fn=frontend_only_interface,
+                inputs=[frontend_text_input, frontend_dialect_choice],
+                outputs=[processed_output, ipa_output, frontend_status]
             )
         
-        # Speech Synthesis Module 
-        with gr.Tab("🎵 Speech Synthesis"):
-            gr.Markdown("## Zero-Shot Dialectal Speech Synthesis")
+        with gr.Tab("Speech Synthesis"):
+            gr.Markdown("## Zero-Shot Speech Synthesis")
             
             with gr.Row():
-                # Left Column - Input Section
                 with gr.Column():
-                    # Sample Texts Table
-                    gr.Markdown("### 📋 Quick Input Examples")
-                    sample_table = gr.DataFrame(
-                        value=SAMPLE_TEXTS,
-                        headers=["ID", "Sample Text"],
-                        interactive=False,
-                        wrap=True
-                    )
+                    # Sample text selection
+                    gr.Markdown("### Sample Texts")
+                    sample_text_buttons = []
+                    for text in SAMPLE_TEXTS["Chinese"]:
+                        btn = gr.Button(text[:20] + "..." if len(text) > 20 else text, size="sm")
+                        sample_text_buttons.append((btn, text))
                     
                     text_input = gr.Textbox(
-                        label="Input Text", 
-                        placeholder="Enter text to synthesize...",
+                        label="Input Text (Chinese text input supported)", 
+                        placeholder="Please enter Chinese text to synthesize...",
                         lines=3
                     )
                     
                     dialect_choice = gr.Dropdown(
-                        label="Select Dialect", 
+                        label="Select Dialect (Choose dialect type for synthesis)", 
                         choices=pipeline.dialect_list,
                         value="putonghua"
                     )
                     
-                    # Default Reference Selection
-                    gr.Markdown("### 🎯 Quick Reference Selection")
-                    use_default_ref_btn = gr.Button("📁 Use Default Reference for Selected Dialect", variant="secondary")
+                    # Sample reference audio buttons
+                    gr.Markdown("### Reference Audio")
+                    with gr.Row():
+                        sample_audio_male_btn = gr.Button("📁 Use Sample Audio (Male)", size="sm")
+                        sample_audio_female_btn = gr.Button("📁 Use Sample Audio (Female)", size="sm")
                     
                     with gr.Row():
                         ref_audio = gr.Audio(
-                            label="Reference Audio", 
+                            label="Reference Audio (Upload reference audio file)", 
                             type="filepath"
                         )
                         ref_text = gr.Textbox(
-                            label="Reference Text", 
-                            placeholder="Reference audio transcription...",
+                            label="Reference Text (Text content corresponding to reference audio)", 
+                            placeholder="Text corresponding to reference audio...",
                             lines=2
                         )
                 
-                # Right Column - Advanced Parameters
                 with gr.Column():
-                    gr.Markdown("### ⚙️ Advanced Parameters")
+                    gr.Markdown("### Parameters")
                     
                     target_rms = gr.Slider(
-                        label="Target RMS", 
-                        info="Output audio volume normalization value",
+                        label="Target Volume (Audio volume normalization value)", 
                         minimum=0.01, 
                         maximum=1.0, 
                         value=0.1,
                         step=0.01
                     )
                     
-                    cross_fade_duration = gr.Slider(
-                        label="Cross-fade Duration", 
-                        info="Cross-fade duration between audio segments",
-                        minimum=0.0, 
-                        maximum=1.0, 
-                        value=0.15,
-                        step=0.01
-                    )
-                    
                     nfe_step = gr.Slider(
-                        label="NFE Steps", 
-                        info="Number of function evaluation steps",
+                        label="Denoising Steps (Diffusion model denoising steps)", 
                         minimum=1, 
                         maximum=100, 
                         value=32,
                         step=1
                     )
                     
-                    cfg_strength = gr.Slider(
-                        label="CFG Strength", 
-                        info="Classifier-free guidance strength",
-                        minimum=0.0, 
-                        maximum=5.0, 
-                        value=2.0,
-                        step=0.1
-                    )
-                    
-                    sway_sampling_coef = gr.Slider(
-                        label="Sway Sampling Coefficient", 
-                        info="Sway sampling coefficient",
-                        minimum=-2.0, 
-                        maximum=2.0, 
-                        value=-1.0,
-                        step=0.1
-                    )
-                    
                     speed = gr.Slider(
-                        label="Speed", 
-                        info="Speech playback speed",
+                        label="Speech Speed (Speech playback speed)", 
                         minimum=0.1, 
                         maximum=3.0, 
                         value=1.0,
                         step=0.1
                     )
             
-            synthesize_btn = gr.Button("🎵 Start Synthesis", variant="primary", size="lg")
+            synthesize_btn = gr.Button("🎵 Start Synthesis", variant="primary")
             
             with gr.Row():
                 output_audio = gr.Audio(label="Synthesis Result", type="filepath")
                 synthesis_status = gr.Textbox(label="Synthesis Status", interactive=False)
             
-            # Event handlers
-            sample_table.select(
-                fn=fill_sample_text,
-                inputs=None,
-                outputs=text_input
+            # Connect sample text buttons
+            for btn, sample_text in sample_text_buttons:
+                btn.click(
+                    fn=update_sample_text,
+                    inputs=[gr.State(sample_text)],
+                    outputs=[text_input]
+                )
+            
+            # Connect sample audio buttons
+            sample_audio_male_btn.click(
+                fn=update_sample_audio_male,
+                inputs=[dialect_choice],
+                outputs=[ref_audio, ref_text]
             )
             
-            use_default_ref_btn.click(
-                fn=fill_default_ref,
-                inputs=dialect_choice,
+            sample_audio_female_btn.click(
+                fn=update_sample_audio_female,
+                inputs=[dialect_choice],
                 outputs=[ref_audio, ref_text]
             )
             
@@ -691,34 +780,32 @@ def create_gradio_interface():
                 fn=synthesize_interface,
                 inputs=[
                     text_input, dialect_choice, ref_audio, ref_text,
-                    target_rms, cross_fade_duration, nfe_step, 
-                    cfg_strength, sway_sampling_coef, speed
+                    target_rms, nfe_step, speed
                 ],
                 outputs=[output_audio, synthesis_status]
             )
         
-        with gr.Tab("📖 Documentation"):
+        with gr.Tab("User Guide"):
             gr.Markdown("""
-            ## 📖 Usage Guide
+            ## 📖 User Guide
             
             ### 1. Model Information
-            - **Model Status**: Model is automatically pre-loaded at system startup
+            - **Model Status**: System automatically preloads model at startup
             - **Configuration**: Model parameters are preset in the script
-            - **MoE Architecture**: Supports multi-expert mixture model inference
+            - **MoE Architecture**: Supports Mixture of Experts model inference
             
-            ### 2. Text to IPA Conversion
-            - **Input Text**: Supports Chinese text with automatic frontend processing
-            - **Dialect Selection**: Choose the target dialect for conversion
-            - **Frontend Processing**: Shows intermediate processing results
-            - **Final IPA**: Displays the final IPA phoneme sequence
+            ### 2. Frontend Processing
+            - **Input Text**: Supports Chinese text, automatic frontend processing
+            - **Dialect Selection**: Supports multiple Chinese dialects
+            - **Output**: Provides processed phonetic representation and IPA format
             
             ### 3. Speech Synthesis
-            - **Quick Examples**: Click on sample texts to quickly fill input
-            - **Input Text**: Supports Chinese text with automatic frontend processing
+            - **Sample Texts**: Click sample text buttons to auto-fill input
+            - **Input Text**: Supports Chinese text, automatic frontend processing
             - **Dialect Selection**: Supports multiple Chinese dialects
-            - **Reference Audio**: Upload clear reference audio files (WAV format recommended)
-            - **Reference Text**: Input the transcription of reference audio
-            - **Default References**: Use predefined reference audio for each dialect
+            - **Reference Audio**: Upload clear reference audio file (WAV format recommended)
+            - **Reference Text**: Enter text content corresponding to reference audio
+            - **Sample Audio**: Click "Use Sample Audio" to load dialect-specific reference
             
             ### 4. Supported Dialects
             """)
@@ -728,10 +815,6 @@ def create_gradio_interface():
                     ["putonghua", "Mandarin Chinese"],
                     ["chengdu", "Chengdu Dialect"],
                     ["gaoxiong", "Kaohsiung Dialect"], 
-                    ["jingjujingbai", "Beijing Opera Jingbai"],
-                    ["jingjuyunbai", "Beijing Opera Yunbai"],
-                    ["nanjing", "Nanjing Dialect"],
-                    ["qingdao", "Qingdao Dialect"],
                     ["shanghai", "Shanghai Dialect"],
                     ["shijiazhuang", "Shijiazhuang Dialect"],
                     ["wuhan", "Wuhan Dialect"],
@@ -743,40 +826,32 @@ def create_gradio_interface():
             )
             
             gr.Markdown("""
-            ### 5. Important Notes
-            - Ensure reference audio quality is good with minimal noise
-            - Reference text must match the audio content exactly
-            - The model is pre-loaded at system startup
+            ### 5. Notes
+            - Ensure reference audio has good quality with minimal noise
+            - Reference text must exactly match audio content
+            - Model loading is required for first-time use
             - Synthesis time depends on text length and hardware performance
-            - Use the quick examples and default references for faster setup
-            
-            ### 6. Features
-            - **Zero-shot synthesis**: Generate speech in any supported dialect
-            - **MoE Architecture**: Efficient mixture of experts model
-            - **Frontend Processing**: Automatic text normalization and IPA conversion
-            - **Multiple Dialects**: Support for 12+ Chinese dialects
-            - **Quick Setup**: Sample texts and default references for easy testing
+            - Use sample texts and reference audios for quick testing
             """)
     
     return demo
 
 if __name__ == "__main__":
     # Command line arguments
-    parser = argparse.ArgumentParser(description="DiaMoE-TTS Gradio Interface")
-    parser.add_argument("--port", type=int, default=30769, help="Server port")
-    parser.add_argument("--host", type=str, default="0.0.0.0", help="Server host")
+    parser = argparse.ArgumentParser(description="Dialect TTS Gradio Interface")
+    parser.add_argument("--port", type=int, default=7860, help="Service port")
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="Service host")
     parser.add_argument("--share", action="store_true", help="Create public link")
     args = parser.parse_args()
     
     # Create and launch interface
     demo = create_gradio_interface()
-    print("Starting DiaMoE-TTS Gradio Interface...")
-    print(f"Server URL: http://{args.host}:{args.port}")
+    print("Starting Dialect TTS Gradio Interface...")
+    print(f"Service address: http://{args.host}:{args.port}")
     
     demo.launch(
         server_name=args.host,
         server_port=args.port,
         share=args.share,
-        inbrowser=True,
-        show_error=True
+        inbrowser=True
     )
