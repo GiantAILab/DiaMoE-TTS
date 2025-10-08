@@ -48,6 +48,7 @@ Regarding the construction details of the IPA dialect frontend system, please re
 - **🔥[2025-09-25]** Release checkpoints on 🤗 **Hugging Face** and 🔮 **ModelScope**
 - **📦[2025-09-25]** Release training datasets
 - **📄[2025-10-05]** Update our paper on arXiv
+- **🧠[2025-10-08]** Release gradio app for quick start！
 
 ---
 
@@ -110,7 +111,7 @@ See [ipa_frontend](./dialect_frontend/README.md) for more details.
 - [x] release code for IPA frontend
 - [x] release our checkpoints
 - [x] release open-source training dataset IPA frontend
-- [ ] develop gradio app for DiaMoE-TTS
+- [x] develop gradio app for DiaMoE-TTS
 
 
 [//]: # (---)
@@ -125,6 +126,7 @@ See [ipa_frontend](./dialect_frontend/README.md) for more details.
 ## Acknowledgements 🙏
 - Thanks to all contributors and community members who helped improve this project.
 - This work builds upon [F5-TTS](https://github.com/SWivid/F5-TTS) and related research.
+- Our frontend uses [PaddleSpeech](https://github.com/PaddlePaddle/PaddleSpeech) to obtain Mandarin pinyin first.
 
 ---
 
