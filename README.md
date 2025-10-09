@@ -132,3 +132,16 @@ See [ipa_frontend](./dialect_frontend/README.md) for more details.
 
 ## License 📝
 Our code is released under MIT License.
+
+## 📚 Citation
+
+If you find our model helpful, please consider citing our projects 📝 and staring us ⭐️！
+
+```bib
+@article{chen2025diamoe,
+  title={DiaMoE-TTS: A Unified IPA-Based Dialect TTS Framework with Mixture-of-Experts and Parameter-Efficient Zero-Shot Adaptation},
+  author={Chen, Ziqi and Chen, Gongyu and Wang, Yihua and Ding, Chaofan and Zhang, Wei-Qiang and others},
+  journal={arXiv preprint arXiv:2509.22727},
+  year={2025}
+}
+```
