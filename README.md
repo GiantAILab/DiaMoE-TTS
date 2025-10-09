@@ -5,7 +5,6 @@
 
 [![arXiv](https://img.shields.io/badge/arXiv-2509.22727-b31b1b.svg)](https://arxiv.org/abs/2509.22727)
 [![Hugging Face](https://img.shields.io/badge/🤗%20HuggingFace-DiaMoETTS-yellow)](https://huggingface.co/RICHARD12369/DiaMoE_TTS)
-[![ModelScope](https://img.shields.io/badge/🔮%20ModelScope-DiaMoETTS-blue)](https://modelscope.cn/models/)
 
 </div>
 
@@ -21,7 +20,7 @@ This repository is designed to provide a comprehensive implementation for the se
 - 🧠 A modular **multi-dialect TTS framework** built on [**F5-TTS**](https://github.com/SWivid/F5-TTS).
 - 🔤 A **unified IPA-based dialect frontend** for consistent cross-dialect phonetic representation.
 - 🏋️ **Training & inference scripts** (CLI + config examples) for end-to-end reproduction.
-- 🤗 **Hugging Face** and 🔮 **ModelScope** checkpoints *(to be updated)* for easy access to pre-trained models.
+- 🤗 **Hugging Face** checkpoints for easy access to pre-trained models.
 
 Short Intro on [**DiaMoE-TTS**](https://arxiv.org/abs/2509.22727):
 
@@ -45,7 +44,7 @@ Regarding the construction details of the IPA dialect frontend system, please re
 
 ## News & Updates 🗞️
 - **🚀[2025-09-21]** Initial public release of codebase.
-- **🔥[2025-09-25]** Release checkpoints on 🤗 **Hugging Face** and 🔮 **ModelScope**
+- **🔥[2025-09-25]** Release checkpoints on 🤗 **Hugging Face**
 - **📦[2025-09-25]** Release training datasets
 - **📄[2025-10-05]** Update our paper on arXiv
 - **🧠[2025-10-08]** Release gradio app for quick start！
