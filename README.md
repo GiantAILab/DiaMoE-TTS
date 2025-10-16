@@ -132,6 +132,11 @@ See [ipa_frontend](./dialect_frontend/README.md) for more details.
 ## License 📝
 Our code is released under MIT License.
 
+
+## Star 🌟 History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=GiantAILab/DiaMoE-TTS&type=date&legend=top-left)](https://www.star-history.com/#GiantAILab/DiaMoE-TTS&type=date&legend=top-left)
+
 ## 📚 Citation
 
 If you find our model helpful, please consider citing our projects 📝 and staring us ⭐️！
