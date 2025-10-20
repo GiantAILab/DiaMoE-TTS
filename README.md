@@ -103,6 +103,7 @@ See [ipa_frontend](./dialect_frontend/README.md) for more details.
 | **🚀 yunbai(Peking Opera)_lora**  |   [![HF](https://img.shields.io/badge/🤗%20HF-DiaMoE--yunbai-yellow)](https://huggingface.co/RICHARD12369/DiaMoE_TTS/blob/main/10ep_mlpEXP_9_jjyb_lora.pt)   | ✅ |
 | **🚀 jingbai(Peking Opera)_lora** |  [![HF](https://img.shields.io/badge/🤗%20HF-DiaMoE--jingbai-yellow)](https://huggingface.co/RICHARD12369/DiaMoE_TTS/blob/main/10ep_mlpEXP_9_jjjb_lora.pt)   | ✅ |
 |        **🚀 nanjing_lora**        | [![HF](https://img.shields.io/badge/🤗%20HF-DiaMoE--nanjing-yellow)](https://huggingface.co/RICHARD12369/DiaMoE_TTS/blob/main/10ep_mlpEXP_9_nanjing_lora.pt) | ✅ |
+|        **🛠️ our g2pw**        | [![HF](https://img.shields.io/badge/🤗%20HF-g2pw-yellow)](https://huggingface.co/RICHARD12369/DiaMoE_TTS/blob/main/g2pw.tar.gz) | ✅ |
 ---
 
 ## Development Roadmap & TODO 🗺️
