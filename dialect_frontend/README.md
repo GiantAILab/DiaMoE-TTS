@@ -24,6 +24,7 @@ The system processes input text through 6 sequential steps:
 ### Step 0: Get Frontend in Mandarin Pinyin
 - Obtain the corresponding Mandarin pinyin of the text frontend
 - **Script**: `gen_ppinyin_oop.py`
+- **🛠️using our g2pw** : [![HF](https://img.shields.io/badge/🤗%20HF-g2pw-yellow)](https://huggingface.co/RICHARD12369/DiaMoE_TTS/blob/main/g2pw.tar.gz)
 
 ### Step 1: Fix Erhua in Mandarin Frontend
 - Handles retroflex suffix (儿化音) correction in Mandarin pinyin
